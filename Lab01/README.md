@@ -297,7 +297,7 @@ Dupa astea imaginile pot fi vazute [aici](https://hub.docker.com/r/catalinstir/)
 > [!IMPORTANT]
 > Imaginile vor fi sterse dupa terminarea laboratorului
 
-![Comenzile apelate](Lab01/IstoricTask1.PNG)
+![Comenzile apelate](IstoricTask1.PNG)
 
 ## 2. First Alpine Linux Containers
 
@@ -382,7 +382,7 @@ Terminologie de baza pentru a lucra si a intelege Docker:
 - Docker daemon: Serviciu ce ruleaza in background pe host care se ocupa de building, rularea si distribuirea containerelor Docker
 - Docker Hub: Un registru al imaginilor Docker.
 
-![Comenzile apelate](Lab01/IstoricTask2.PNG)
+![Comenzile apelate](IstoricTask2.PNG)
 
 ## 3. Doing More With Docker Images
 
@@ -463,5 +463,5 @@ Chiar daca constructia pare o operatie atomica la nivel de OS, era este in reali
 Vom analiza imaginea creata cu `docker image history ID_container`, care ne arata imaginile de containere intermediare in crearea imaginii finale.
 Acest aspect 
 
-
+![Comenzile apelate](IstoricTask3.PNG)
 
