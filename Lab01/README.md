@@ -461,7 +461,312 @@ Acum rulam `docker image build -t hello:v0.1 .` pentru a ne crea imaginea denumi
 Chiar daca constructia pare o operatie atomica la nivel de OS, era este in realitate impartita in layer-e. Putem observa in fiecare `docker image build` ca sunt cate 5 pasi, fiecare cu mai multe task-uri.
 
 Vom analiza imaginea creata cu `docker image history ID_container`, care ne arata imaginile de containere intermediare in crearea imaginii finale.
-Acest aspect 
+
+Acest aspect poate fi foarte puternic deoarece in scenariul modificarii aplicatiei, aceasta schimbare poate modifica un singur layer.
+
+Pentru a vedea asta, vom modifica `index.js` astfel:
+> echo "console.log(\"this is v0.2\");" >> index.js
+
+Acum la urmatorul `docker image buld -t hello:v0.2`, avem:
+```
+$ docker image build -t hello:v0.2 .
+[+] Building 0.7s (9/9) FINISHED                           docker:default
+ => [internal] load build definition from Dockerfile                 0.0s
+ => => transferring dockerfile: 131B                                 0.0s
+ => [internal] load metadata for docker.io/library/alpine:latest     0.5s
+ => [internal] load .dockerignore                                    0.0s
+ => => transferring context: 2B                                      0.0s
+ => [internal] load build context                                    0.0s
+ => => transferring context: 1.26kB                                  0.0s
+ => [1/4] FROM docker.io/library/alpine:latest@sha256:a8560b36e8b82  0.0s
+ => CACHED [2/4] RUN apk update && apk add nodejs                    0.0s
+ => [3/4] COPY . /app                                                0.1s
+ => [4/4] WORKDIR /app                                               0.1s
+ => exporting to image                                               0.0s
+ => => exporting layers                                              0.0s
+ => => writing image sha256:0c841c0b71cadd5b68ad9ffb3a3467f0cfbbc76  0.0s
+ => => naming to docker.io/library/hello:v0.2 
+```
+, unde ar trebui sa avem la unele task-uri __using cache__, unde indica refolosirea cache-ului din fosta imagine
+
+### 4. Image Inspection
+
+Pentru a analiza o imagine, fie facuta de noi sau adusa din DockerHub, avem comanda `docker image inspect IMAGE_NAME`, care ne va da detaliile in format JSON. Aici sunt destul de multe informatii, cum ar fii:
+- layer-ele imaginii
+- driver-ul folosit pentru a stoca layer-ele
+- arhitectura/SO-ul pentru care a fost creata
+- metadate
+- etc etc
+
+Putem vedea o lista de layer-e, cu `docker image inspect --format "{{ json .RootFS.Layers }}" alpine`:
+```
+["sha256:08000c18d16dadf9553d747a58cf44023423a9ab010aab96cf263d2216b8b350"]
+```
 
 ![Comenzile apelate](IstoricTask3.PNG)
 
+## 4. Application Containerization and Microservice Orchestration
+
+- activitate focusata pe orchestrarea microserviciilor folosind Docker si Docker Compose
+- presupune crearea unei arhiteturi de aplicatie bazata pe microservicii
+
+### 0. Basic Link Extractor Script
+- clonare repository pentru activitate
+- Docker si Docker Compose instalate
+Avem un script de python care are dependinte care ar trebui instalate, insa instalarea intregilor dependinte pentru un script atat de simplu pare un 'overhead', si pe langa asta, se pot intampina mai multe probleme:
+    - scriptul este executabil?
+    - este Python instalat pe masina?
+    - poti instala software pe masina?
+    - este `pip` instalat?
+    - bibliotecile `requests` si `beautifulSoup` (cele necesare aici) sunt instalate?
+De asta, vom incerca sa 'containerizam' scriptul cu tot ce ii trebuie.
+
+### 1. Crearea environment-ului
+Avem un Dockerfile care porneste de la imaginea oficiala de `python`:
+```
+FROM       python:3
+LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+
+RUN        pip install beautifulsoup4
+RUN        pip install requests
+
+WORKDIR    /app
+COPY       linkextractor.py /app/
+RUN        chmod a+x linkextractor.py
+
+ENTRYPOINT ["./linkextractor.py"]
+```
+Acum prin rularea scriptului, care este cu succes, cu `docker container run -it --rm linkextractor:step1 http://example.com/`, avem output-ul:
+> http://www.iana.org/domains/example
+, care este ce ne asteptam
+
+### 2. Link Extractor Module with Full URI and Anchor Text
+De data asta avem un script cu aceeasi functionalitate, insa putin mai avansat, pentru care avem un nou fisier script. 
+Pentru acesta vom crea o noua imagine cu `docker image build -t linkextractor:step2 .`
+, folosind alt nume pentru a nu suprascrie imaginea precedenta.
+
+Ruland containerul vedem ca se realizeaza cu succes si obtinem output-ul:
+```
+$ docker container run -it --rm linkextractor:step2 https://training.play-with-docker.com/
+[Play with Docker classroom](https://training.play-with-docker.com/)
+[About](https://training.play-with-docker.com/about/)
+[IT Pros and System Administrators](https://training.play-with-docker.com/#ops)
+[Developers](https://training.play-with-docker.com/#dev)
+[Stage 1: The Basics](https://training.play-with-docker.com/ops-stage1)
+[Stage 2: Digging Deeper](https://training.play-with-docker.com/ops-stage2)
+[Stage 3: Moving to Production](https://training.play-with-docker.com/ops-stage3)
+[Stage 1: The Basics](https://training.play-with-docker.com/dev-stage1)
+[Stage 2: Digging Deeper](https://training.play-with-docker.com/dev-stage2)
+[Stage 3: Moving to Staging](https://training.play-with-docker.com/dev-stage3)
+[Full list of individual labs](https://training.play-with-docker.com/alacart)
+[[IMG]](https://twitter.com/intent/tweet?text=Play with Docker Classroom&url=https://training.play-with-docker.com/&via=docker&related=docker)
+[[IMG]](https://facebook.com/sharer.php?u=https://training.play-with-docker.com/)
+[[IMG]](https://plus.google.com/share?url=https://training.play-with-docker.com/)
+[[IMG]](http://www.linkedin.com/shareArticle?mini=true&url=https://training.play-with-docker.com/&title=Play%20with%20Docker%20Classroom&source=https://training.play-with-docker.com)
+[[IMG]](https://www.docker.com/dockercon/)
+[Sign up today](https://www.docker.com/dockercon/)
+[Register here](https://dockr.ly/slack)
+[here](https://www.docker.com/legal/docker-terms-service)
+[[IMG]](https://www.docker.com)
+[[IMG]](https://www.facebook.com/docker.run)
+[[IMG]](https://twitter.com/docker)
+[[IMG]](https://www.github.com/play-with-docker/play-with-docker.github.io)
+```
+, iar containerul vechi si-a pastrat functionalitatea.
+
+### 3. Link Extractor API Service
+De data asta avem o alta ierarhie:
+```
+.
+├── Dockerfile
+├── README.md
+├── linkextractor.py
+├── main.py
+└── requirements.txt
+```
+, cu un alt nou Dockerfile:
+```
+FROM       python:3
+LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+
+WORKDIR    /app
+COPY       requirements.txt /app/
+RUN        pip install -r requirements.txt
+
+COPY       *.py /app/
+RUN        chmod a+x *.py
+
+CMD        ["./main.py"]
+```
+Dupa crearea imaginii cu `docker image build -t linkextractor:step3 .` si rularea containerului in background `docker container run -d -p 5000:5000 --name=linkextractor linkextractor:step3`, avem un serviciu API care accepta cereri in formatul `/api/<url>` si raspunde cu un JSON continand output-ul.
+
+`curl -i http://localhost:5000/api/http://example.com/`
+Output:
+```
+$ curl -i http://localhost:5000/api/http://example.com/
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.3 Python/3.13.2
+Date: Sat, 29 Mar 2025 23:34:52 GMT
+Content-Type: application/json
+Content-Length: 79
+Connection: close
+
+[{"href":"https://www.iana.org/domains/example","text":"More information..."}]
+```
+, dupa care am scos containerul `docker container rm -f linkextractor`
+
+### 4. Link Extractor API and Web Front End Services
+Avem mai multe modificari acum:
+```
+.
+├── README.md
+├── api
+│   ├── Dockerfile
+│   ├── linkextractor.py
+│   ├── main.py
+│   └── requirements.txt
+├── docker-compose.yml
+└── www
+    └── index.php
+```
+- Observam ca:
+    1. serviciul API a fost mutat in directorul `./api` 
+    2. avem in `./www` un front-end simplu in php care comunica cu API-ul
+    3. avem un fisier `docker-compose.yml` pentru a creea componente si a le 'lipi'
+Planuim sa avem 2 containere, unul pentru API si unul pentru interfata. Pentru a realiza comunicarea intre ele putem ori sa le mapam porturile pe host, ori sa cream o retea privata in Docker pentru acces direct, solutie pe care o vom alege.
+
+Fisierul `docker-compose.yml`:
+```
+$ cat docker-compose.yml
+version: '3'
+
+services:
+  api:
+    image: linkextractor-api:step4-python
+    build: ./api
+    ports:
+      - "5000:5000"
+  web:
+    image: php:7-apache
+    ports:
+      - "80:80"
+    environment:
+      - API_ENDPOINT=http://api:5000/api/
+    volumes:
+      - ./www:/var/www/html
+```
+, unde se descriu serviciile `api` si `web` cu imaginile aferente.
+
+Pentru a porni serviciile vom da comanda `docker-compose up -d --build` :
+```
+$ docker-compose up -d --build
+WARN[0000] /root/linkextractor/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+[+] Running 8/14
+[+] Running 11/14⣀⠀⠀⠀] Pulling                                   4.8s
+[+] Running 12/14⣿⣿⣿⠀] Pulling                                   5.2s
+[+] Running 12/14⣿⣿⣿⣿] 146.4MB / 163.3MB Pulling                 5.3s
+[+] Running 12/14⣿⣿⣿⣿] 146.4MB / 163.3MB Pulling                 5.4s
+[+] Running 12/14⣿⣿⣿⣿] 146.4MB / 163.3MB Pulling                 5.5s
+[+] Running 12/14⣿⣿⣿⣿] 146.4MB / 163.3MB Pulling                 5.7s
+/----------------/
+       ...
+       ...
+       ...
+/----------------/
+ => => transferring context: 1.39kB                              0.0s
+ => CACHED [api 2/6] WORKDIR    /app                             0.0s
+ => CACHED [api 3/6] COPY       requirements.txt /app/           0.0s
+ => CACHED [api 4/6] RUN        pip install -r requirements.txt  0.0s
+ => CACHED [api 5/6] COPY       *.py /app/                       0.0s
+ => CACHED [api 6/6] RUN        chmod a+x *.py                   0.0s
+ => [api] exporting to image                                     0.0s
+ => => exporting layers                                          0.0s
+ => => writing image sha256:2d31521b3ee23dff0350358325c7e19ab71  0.0s
+ => => naming to docker.io/library/linkextractor-api:step4-pyth  0.0s
+ => [api] resolving provenance for metadata file                 0.0s
+[+] Running 3/3
+ ✔ Network linkextractor_default  Created                        0.1s
+ ✔ Container linkextractor-api-1  Started                        0.7s
+ ✔ Container linkextractor-web-1  Started
+```
+Verificam rularea ambelor servicii cu un `docker container ls`:
+```
+CONTAINER ID   IMAGE                            COMMAND      CREATED          STATUS          PORTS                    NAMES
+b21def2828e1   php:7-apache                     "docker-php-entrypoi…"   47 seconds ago   Up 47 seconds   0.0.0.0:80->80/tcp       linkextractor-web-1
+3e6f0a220d92   linkextractor-api:step4-python   "./main.py"      47 seconds ago   Up 47 seconds   0.0.0.0:5000->5000/tcp   linkextractor-api-1
+```
+In plus, putem aduce orice modificari ale paginii si ele se vor reflecta in instanta 'running' deoarece am facut directorul `www` _bind mounted_
+
+Pentru a inchide serviciile, avem `docker-compose down`
+
+### 5. Redis Service for Caching
+```
+.
+├── README.md
+├── api
+│   ├── Dockerfile
+│   ├── linkextractor.py
+│   ├── main.py
+│   └── requirements.txt
+├── docker-compose.yml
+└── www
+    ├── Dockerfile
+    └── index.php
+```
+S-a adaugat un container de Redis pentru caching. API-ul comunica cu Redis pentru a evita descarcarea si parsarea de pagini care au fost prelucrate anterior.
+Pentru asta, s-a adaugat in `docker-compose.yml`: 
+> REDIS_URL=redis://redis:6379
+si in `index.php`:
+> redis_conn = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
+, pentru comunicarea API-Instanta Redis.
+
+Pornim serviciile, la fel, cu `docker-compose up -d --build`, iar pentru a testa functionaliatea serviciului Redis, putem da comanda `docker-compose exec redis redis-cli monitor` si sa incercam sa facem cereri pentru pagini care au fost deja accesate si sa observam log-urile Redis.
+
+In final, oprim serviciile cu `docker-compose down`.
+
+### 6. Swap Python API Service with Ruby
+Schimbari: API-ul este rescris in Ruby, iar evenimentele de cache (HIT/MISS) sunt jurnalizate folosind volume.
+```
+.
+├── README.md
+├── api
+│   ├── Dockerfile
+│   ├── Gemfile
+│   └── linkextractor.rb
+├── docker-compose.yml
+├── logs
+└── www
+    ├── Dockerfile
+    └── index.php
+```
+Fisierul `docker-compose.yml` are mici modificari pentru acomodarea cu noul script scris in Ruby.
+
+Apelam `docker-compose up -d --build`, si putem face request-uri cu `curl -i http://localhost:4567/api/http://example.com/`:
+```
+ curl -i http://localhost:4567/api/http://example.com/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 97
+X-Content-Type-Options: nosniff
+Server: WEBrick/1.4.4 (Ruby/2.6.10/2022-04-12)
+Date: Sun, 30 Mar 2025 00:10:57 GMT
+Connection: Keep-Alive
+
+[
+  {
+    "text": "More information...",
+    "href": "https://www.iana.org/domains/example"
+  }
+```
+
+Daca totul a mers bine, se pot face request-uri si din [interfata web](http://ip172-18-0-25-cvk8e2i91nsg008j1m3g-80.direct.labs.play-with-docker.com), iar log-urile pe putem urmari live cu `tail -f logs/extraction.log`.
+
+In final, oprim serviciile cu `cat logs/extraction.log` si putem vedea log-urile cu `cat logs/extraction.log`.
+
+Puncte cheie:
+- ce dificultati poate impune rularea unui simplu script
+- cat de usor este de a face "deploy" la o aplicatie folosind microserviciile
+- cum putem schimba componente ale serviciilor si a pastra persistenta datelor
+
+Istoric comenzi:
+![Comenzile apelate](IstoricTask4.PNG)
