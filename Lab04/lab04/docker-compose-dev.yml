@@ -1,0 +1,14 @@
+services:
+  dev-frontend:
+    container_name: dev-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.development
+    volumes:
+      - ./frontend/src:/usr/local/app/src
+    ports:
+      - "4200:4200"
+    networks:
+      - lab4-std
+    depends_on:
+      - backend

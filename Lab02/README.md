@@ -65,7 +65,7 @@ Rulam containerul de `mysql` in aceeasi retea cu cel de apache:
 > docker container run -e MYSQL_ROOT_PASSWORD=student --network NUME_NETWORK --name mysql-server -d mysql
 
 Construim imaginea personalizata din Dockerfile-ul furnizat:
-```
+```dockerfile
 FROM php:8.3-apache
 
 RUN docker-php-ext-install mysqli pdo_mysql \

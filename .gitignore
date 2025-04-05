@@ -1,3 +1,4 @@
+.gitignore
 lab02key
 lab02key.pub
 *.pem

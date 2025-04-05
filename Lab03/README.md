@@ -11,7 +11,7 @@ Avem in arhiva 2 fisiere:
     - `Dockerfile`
 
 Analizand `Dockerfile`-ul din `server_web`:
-```
+```dockerfile
 FROM php:8.3-apache
  
 RUN docker-php-ext-install mysqli pdo_mysql 
@@ -25,7 +25,7 @@ EXPOSE 80/tcp
 CMD ["apachectl", "-D", "FOREGROUND"]
 ```
 , vedem ca este imaginea unui server web _apache_, iar `Dockerfile`-ul din `server_db`:
-```
+```dockerfile
 FROM mysql:latest
 
 ENV MYSQL_ROOT_PASSWORD=student
@@ -79,7 +79,7 @@ Intrand pe _localhost:8080_ vedem:
 ![volume_access1](volume1.PNG)
 
 Acum vom inspecta volumele cu `docker volume inspect VOLUME` pentru `mysql-server-volume` si `web-server-volume`:
-```
+```sh
 docker volume inspect mysql-server-volume 
 [
     {
@@ -93,7 +93,7 @@ docker volume inspect mysql-server-volume
     }
 ]
 ```
-```
+```sh
 docker volume inspect web-server-volume   
 [
     {
@@ -144,7 +144,7 @@ Modificam in  `index.php` un `echo` si accesam iar pagina web, fara a sterge con
 Stergem ambele containere cu `docker rm -f`, si le pornim din nou cu aceleasi _bind mounts_:
 ![bind mount access 3](bind_mounts3.PNG)
 , si dam un inspect pe _bind mounts_:
-```
+```sh
 docker inspect web-server
 
 ...etc...
@@ -180,7 +180,7 @@ docker inspect web-server
 
 
 ```
-```
+```sh
 docker inspect mysql-server
 
 ...etc...

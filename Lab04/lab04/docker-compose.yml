@@ -1,0 +1,44 @@
+services:
+  database:
+    build: 
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: lab4-db
+    volumes:
+      - todo-database-volume:/var/lib/postgresql/data
+    networks:
+      - lab4-std
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lab4-backend
+    environment:
+      - DB_NAME=laborator
+      - DB_USER=student
+      - DB_PASSWORD=parolasecreta
+    networks:
+      - lab4-std
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lab4-frontend
+    networks:
+      - lab4-std
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+
+networks:
+  lab4-std:
+
+volumes:
+  todo-database-volume:
+

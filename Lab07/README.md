@@ -9,7 +9,7 @@ Si o baza de date pe acel server:
 ![creare database sql](SQLDatabase.PNG)
 
 Fac un tabel fileinfo:
-```
+```sql
 create table fileinfo (
 id int identity(1,1) primary key,
 filename varchar(1000),
@@ -26,7 +26,7 @@ Intrand pe Domain de pe Azure, avem acum:
 ![Hello world](HelloWorld.PNG)
 
 Modific `index.php` pentru a se conecta la baza de date si a afisa cele 2 intrari:
-```
+```php
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,7 +69,7 @@ Dupa instalarea dependintelor, la accesarea domeniului site-ului + /phpQS.php, a
 ![first blob site](dependencies-after.PNG)
 
 Urmeaza sa adaugam un HTML pentru incarcarea dinamica a fisierelor in _blob_:
-```
+```html
 <!DOCTYPE html>
 <html>
 <body>
@@ -84,7 +84,7 @@ Urmeaza sa adaugam un HTML pentru incarcarea dinamica a fisierelor in _blob_:
 </html>
 ```
 , si un fisier `upload.php`:
-```
+```php
 <?php
 $target_dir = "uploads/";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);

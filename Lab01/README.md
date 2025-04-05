@@ -21,13 +21,13 @@
 
 - rularea unui task intr-un container Alpine: rularea comenzii `hostname`:
 
-```
+```sh
  docker container run alpine hostname
 ```
 
 - Docker va cauta imagea `alpine:latest` local, dar pentru ca nu este o va lua din _DockerHub_
 
-```
+```sh
 [node1] (local) root@192.168.0.18 ~
 $  docker container run alpine hostname
 Unable to find image 'alpine:latest' locally
@@ -43,7 +43,7 @@ ab9afc1e9622
 - Putem observa cu ` docker container ls --all` toate containerele . Containerul s-a inchis deoarece procesul din el (_hostname_) s-a incheiat, insa Docker nu dezaloca resursele by default, asa ca va tine containerul in _EXITED_
     - Putem observa si tag-ul 'random' pe care Docker l-a pus containerului
 
-```
+```sh
 $  docker container ls --all
 CONTAINER ID   IMAGE     COMMAND      CREATED         STATUS       PORTS     NAMES
 ab9afc1e9622   alpine    "hostname"   4 minutes ago   Exited (0) 4 minutes ago             nice_roentgen
@@ -57,7 +57,7 @@ ab9afc1e9622   alpine    "hostname"   4 minutes ago   Exited (0) 4 minutes ago  
     - `--rm` pentru a sterge containerul la finalul executiei
 
 Output:
-```
+```sh
 $  docker container run --interactive --tty --rm ubuntu bash
 Unable to find image 'ubuntu:latest' locally
 latest: Pulling from library/ubuntu
@@ -72,7 +72,7 @@ Parasim sesiunea cu `exit` si astfel Docker va dezaloca containerul din cauza fl
 
 #### Run a background MySQL container 
 - Rulam un container MySQl cu comanda:
-```
+```sh
 docker container run \
  --detach \
  --name mydb \
@@ -85,7 +85,7 @@ docker container run \
     - `-e` declara o variabila de mediu (parola de root MySQl in acest caz)
 
 Output:
-```
+```sh
 [node1] (local) root@192.168.0.18 ~
 $  docker container run \
 >  --detach \
@@ -110,7 +110,7 @@ d0b964a6f285544887adf0f43edb4cf0ae66d385318d92940c10f8c96eeb0615
 ```
 
 - Putem vedea cu `docker ps -a` ca containerul ruleaza si are numele __mydb__:
-```
+```sh
 [node1] (local) root@192.168.0.18 ~
 $  docker container ls
 CONTAINER ID   IMAGE          COMMAND                  CREATED         STATUS         PORTS                 NAMES
@@ -120,7 +120,7 @@ d0b964a6f285   mysql:latest   "docker-entrypoint.s…"   2 minutes ago   Up 2min
 - Putem vedea jurnalizarea containerelor cu diferitele comenzi 'built-in' ale Docker: `docker container logs`, `docker container top`
 
 Output `docker container top`:
-```
+```sh
 [node1] (local) root@192.168.0.18 ~
 $    docker container top mydb
 PID                 USER                TIME                COMMAND
@@ -131,7 +131,7 @@ PID                 USER                TIME                COMMAND
 
 Output `docker exec -it mydb \
  mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version`:
- ```
+ ```sh
  [node1] (local) root@192.168.0.18 ~
 $  docker exec -it mydb \
 >  mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version
@@ -146,7 +146,7 @@ mysql  Ver 9.2.0 for Linux on x86_64 (MySQL Community Server - GPL)
 #### Construirea unei imagini simple a unui website
 
 - Ne vom muta in directorul 'linux_tweet_app' care contine un Dockerfile:
-```
+```sh
 $ cat Dockerfile
 FROM nginx:latest
 
@@ -168,7 +168,7 @@ CMD ["nginx", "-g", "daemon off;"]
 > docker image build $DOCKERID/linux_tweet_app:1.0 .
 
 Output:
-```
+```sh
 [node1] (local) root@192.168.0.18 ~/linux_tweet_app
 $  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
 [+] Building 9.3s (8/8) FINISHED                             docker:default
@@ -210,7 +210,7 @@ $  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
     - `--detach` pentru rulare in bg
     - `--publish` pentru a directiona traficul venit de pe portul 80 din container pe portul 80 de pe host
     - `--name` pentru a numi containerul
-```
+```sh
 docker container run \
  --detach \
  --publish 80:80 \
@@ -248,7 +248,7 @@ Pentru ca modificarile noului `index.html` sa persiste, va trebui sa cream o nou
 > docker image build --tag $DOCKERID/linux_tweet_app:2.0 .
 
 Acum daca dam un `docker image ls` putem vedea si noua imagine:
-```
+```sh
 $ docker image ls
 REPOSITORY                    TAG       IMAGE ID       CREATED SIZE
 catalinstir/linux_tweet_app   2.0       1ac62088f825   26 seconds ago 192MB
@@ -260,7 +260,7 @@ Prin rularea unui container din noua imagine putem vedea ca modificarile au luat
 
 #### Push your images to Docker Hub
 Vizualizarea tuturor imaginilor locale numite cu DockerID-ul nostru cu ` docker image ls -f reference="$DOCKERID/*"`
-```
+```sh
 $  docker image ls -f reference="$DOCKERID/*"
 REPOSITORY                    TAG       IMAGE ID       CREATED SIZE
 catalinstir/linux_tweet_app   2.0       1ac62088f825   2 minutes ago 192MB
@@ -271,7 +271,7 @@ catalinstir/linux_tweet_app   1.0       3e74c3a08a5d   About an hour ago 192MB
 > Inainte ca sa publicam imagini pe DockerHub va trebui sa ne logam prin `docker login`
 
 - Vom publica versiunea 1.0 a imaginii aplicatiei web cu ` docker image push $DOCKERID/linux_tweet_app:1.0`
-```
+```sh
 The push refers to a repository [docker.io/<your docker id>/linux_tweet_app]
  910e84bcef7a: Pushed
  1dee161c8ba4: Pushed
@@ -282,7 +282,7 @@ The push refers to a repository [docker.io/<your docker id>/linux_tweet_app]
 ```
 Acum versiunea 2.0: ` docker image push $DOCKERID/linux_tweet_app:2.0`
 
-```
+```sh
 The push refers to a repository [docker.io/<your docker id>/linux_tweet_app]
  0b171f8fbe22: Pushed
  70d38c767c00: Pushed
@@ -315,7 +315,7 @@ Dupa astea imaginile pot fi vazute [aici](https://hub.docker.com/r/catalinstir/)
 > - containerele sunt o abstractizare software, pe scurt
 
 In continuare, voi 'da pull' la o imagine de _alpine_ cu `docker image pull alpine` si voi vizualiza imaginile cu `docker image ps`
-```
+```sh
 $ docker image pull alpine
 Using default tag: latest
 latest: Pulling from library/alpine
@@ -324,7 +324,7 @@ Digest: sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
 Status: Downloaded newer image for alpine:latest
 docker.io/library/alpine:latest
 ```
-```
+```sh
 $ docker image ls
 REPOSITORY    TAG       IMAGE ID       CREATED        SIZE
 alpine        latest    aded1e1a5b37   6 weeks ago    7.83MB
@@ -336,7 +336,7 @@ hello-world   latest    74cc54e27dc4   2 months ago   10.1kB
 Vom rula in continuare un container din imaginea la care tocmai i-am dat 'pull'
 > docker container run alpine ls -l
 Dupa cum am vazut si la activitatea precedenta, comanda va cauta imaginea `alpine`, va crea containerul si va rula `ls -l` in cadrul ei:
-```
+```sh
 total 8
 drwxr-xr-x    2 root     root          4096 Feb 13 23:04 bin
 drwxr-xr-x    5 root     root           340 Mar 29 19:08 dev
@@ -362,7 +362,7 @@ drwxr-xr-x   11 root     root           137 Feb 13 23:04 var
 Observam ca fiecare `docker container run` creeaza cate o instanta separata de executie din aceeasi imagine, fiecare cu propriul filesystem si namespace. Pentru a testa in continuare acest aspect, vom rula urmatoarea comanda:
 > docker container run -it alpine /bin/ash
 ,unde vom da comenzile:
-```
+```sh
 echo "hello world" > hello.txt
 
  ls
@@ -395,7 +395,7 @@ Vom crea un shell interactiv de ubuntu intr-un container:
 > apt-get install -y figlet
 > figlet "hello docker"
 unde putem vedea ca output:
-```
+```sh
 root@57cdf4f2bc67:/# figlet "hello docker"
  _          _ _             _            _
 | |__   ___| | | ___     __| | ___   ___| | _____ _ __
@@ -408,7 +408,7 @@ dupa care iesim din container cu `exit`
 Apoi, vom gasi ID-ul containerului cu `docker container ls -a`, pentru a putea rula `docker container diff "ID_container"` ca sa vedem modificarile aduse containerului (instalarea _figlet_ in cazul nostru).
 
 Pentru a crea imaginea vom da `docker container commit "ID_container"`, pe care o putem vedea cu `docker image ls`:
-```
+```sh
 $ docker image ls
 REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
 <none>       <none>    ba073702329c   24 seconds ago   126MB
@@ -416,7 +416,7 @@ ubuntu       latest    a04dc4851cbc   2 months ago     78.1MB
 ```
 
 Pentru a da un nume (tag) imaginii noi, vom da comanda `docker image tag "ID_imagine" ourfiglet`, dupa iar `docker image ls`:
-```
+```sh
 $ docker image ls
 REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
 ourfiglet    latest    ba073702329c   2 minutes ago   126MB
@@ -424,7 +424,7 @@ ubuntu       latest    a04dc4851cbc   2 months ago    78.1MB
 ```
 
 Vom rula `docker container run ourfiglet figlet hello` pentru a testa noua imagine:
-```
+```sh
  _          _ _
 | |__   ___| | | ___
 | '_ \ / _ \ | |/ _ \
@@ -440,13 +440,13 @@ Aici sunt utile fisierele Dockerfile.
 Acestea sunt la baza fisiere text care ne ajuta sa definim cum este creata o imagine.
 
 Vom crea un fisier `index.js` cu continutul:
-```
+```js
 var os = require("os");
 var hostname = os.hostname();
 console.log("hello from " + hostname);
 ```
 , apoi un Dockerfile astfel:
-```
+```dockerfile
 FROM alpine
 RUN apk update && apk add nodejs
 COPY . /app
@@ -468,7 +468,7 @@ Pentru a vedea asta, vom modifica `index.js` astfel:
 > echo "console.log(\"this is v0.2\");" >> index.js
 
 Acum la urmatorul `docker image buld -t hello:v0.2`, avem:
-```
+```sh
 $ docker image build -t hello:v0.2 .
 [+] Building 0.7s (9/9) FINISHED                           docker:default
  => [internal] load build definition from Dockerfile                 0.0s
@@ -499,7 +499,7 @@ Pentru a analiza o imagine, fie facuta de noi sau adusa din DockerHub, avem coma
 - etc etc
 
 Putem vedea o lista de layer-e, cu `docker image inspect --format "{{ json .RootFS.Layers }}" alpine`:
-```
+```sh
 ["sha256:08000c18d16dadf9553d747a58cf44023423a9ab010aab96cf263d2216b8b350"]
 ```
 
@@ -523,7 +523,7 @@ De asta, vom incerca sa 'containerizam' scriptul cu tot ce ii trebuie.
 
 ### 1. Crearea environment-ului
 Avem un Dockerfile care porneste de la imaginea oficiala de `python`:
-```
+```dockerfile
 FROM       python:3
 LABEL      maintainer="Sawood Alam <@ibnesayeed>"
 
@@ -546,7 +546,7 @@ Pentru acesta vom crea o noua imagine cu `docker image build -t linkextractor:st
 , folosind alt nume pentru a nu suprascrie imaginea precedenta.
 
 Ruland containerul vedem ca se realizeaza cu succes si obtinem output-ul:
-```
+```sh
 $ docker container run -it --rm linkextractor:step2 https://training.play-with-docker.com/
 [Play with Docker classroom](https://training.play-with-docker.com/)
 [About](https://training.play-with-docker.com/about/)
@@ -576,7 +576,7 @@ $ docker container run -it --rm linkextractor:step2 https://training.play-with-d
 
 ### 3. Link Extractor API Service
 De data asta avem o alta ierarhie:
-```
+```sh
 .
 ├── Dockerfile
 ├── README.md
@@ -585,7 +585,7 @@ De data asta avem o alta ierarhie:
 └── requirements.txt
 ```
 , cu un alt nou Dockerfile:
-```
+```dockerfile
 FROM       python:3
 LABEL      maintainer="Sawood Alam <@ibnesayeed>"
 
@@ -602,7 +602,7 @@ Dupa crearea imaginii cu `docker image build -t linkextractor:step3 .` si rulare
 
 `curl -i http://localhost:5000/api/http://example.com/`
 Output:
-```
+```sh
 $ curl -i http://localhost:5000/api/http://example.com/
 HTTP/1.1 200 OK
 Server: Werkzeug/3.1.3 Python/3.13.2
@@ -617,7 +617,7 @@ Connection: close
 
 ### 4. Link Extractor API and Web Front End Services
 Avem mai multe modificari acum:
-```
+```sh
 .
 ├── README.md
 ├── api
@@ -636,7 +636,7 @@ Avem mai multe modificari acum:
 Planuim sa avem 2 containere, unul pentru API si unul pentru interfata. Pentru a realiza comunicarea intre ele putem ori sa le mapam porturile pe host, ori sa cream o retea privata in Docker pentru acces direct, solutie pe care o vom alege.
 
 Fisierul `docker-compose.yml`:
-```
+```sh
 $ cat docker-compose.yml
 version: '3'
 
@@ -658,7 +658,7 @@ services:
 , unde se descriu serviciile `api` si `web` cu imaginile aferente.
 
 Pentru a porni serviciile vom da comanda `docker-compose up -d --build` :
-```
+```sh
 $ docker-compose up -d --build
 WARN[0000] /root/linkextractor/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
 [+] Running 8/14
@@ -690,7 +690,7 @@ WARN[0000] /root/linkextractor/docker-compose.yml: the attribute `version` is ob
  ✔ Container linkextractor-web-1  Started
 ```
 Verificam rularea ambelor servicii cu un `docker container ls`:
-```
+```sh
 CONTAINER ID   IMAGE                            COMMAND      CREATED          STATUS          PORTS                    NAMES
 b21def2828e1   php:7-apache                     "docker-php-entrypoi…"   47 seconds ago   Up 47 seconds   0.0.0.0:80->80/tcp       linkextractor-web-1
 3e6f0a220d92   linkextractor-api:step4-python   "./main.py"      47 seconds ago   Up 47 seconds   0.0.0.0:5000->5000/tcp   linkextractor-api-1
@@ -700,7 +700,7 @@ In plus, putem aduce orice modificari ale paginii si ele se vor reflecta in inst
 Pentru a inchide serviciile, avem `docker-compose down`
 
 ### 5. Redis Service for Caching
-```
+```sh
 .
 ├── README.md
 ├── api
@@ -726,7 +726,7 @@ In final, oprim serviciile cu `docker-compose down`.
 
 ### 6. Swap Python API Service with Ruby
 Schimbari: API-ul este rescris in Ruby, iar evenimentele de cache (HIT/MISS) sunt jurnalizate folosind volume.
-```
+```sh
 .
 ├── README.md
 ├── api
@@ -742,7 +742,7 @@ Schimbari: API-ul este rescris in Ruby, iar evenimentele de cache (HIT/MISS) sun
 Fisierul `docker-compose.yml` are mici modificari pentru acomodarea cu noul script scris in Ruby.
 
 Apelam `docker-compose up -d --build`, si putem face request-uri cu `curl -i http://localhost:4567/api/http://example.com/`:
-```
+```sh
  curl -i http://localhost:4567/api/http://example.com/
 HTTP/1.1 200 OK
 Content-Type: application/json
