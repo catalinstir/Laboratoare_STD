@@ -6,7 +6,7 @@ Laboratorul se focuseaza pe aplicatiile ce sunt compuse din mai multe elemente (
 
 ### Resurse
 Arhiva cu resursele de laborator:
-```sh
+```text
 laborator
 ├── backend/
 │   ├── Dockerfile
@@ -21,7 +21,7 @@ laborator
 └── docker-compose.yml
 ```
 #### docker-compose.yml:
-```docker
+```yaml
 services:
   database:
     build: 
@@ -64,7 +64,7 @@ volumes:
   todo-database-volume:
 ```
 #### docker-compose-dev.yml:
-```docker
+```yaml
 services:
   dev-frontend:
     container_name: dev-frontend
@@ -196,7 +196,7 @@ Se va crea o imagine din acest fisier si se va porni un container 'montand' _bin
 - `docker image build -t laborator/todo-frontend-dev -f Dockerfile.development lab04\frontend`
 - `docker container run --name dev-frontend -p 4200:4200 --mount type=bind,src=lab04/frontend/src/,dst=/usr/local/app/src -d laborator/todo-frontend-dev`
 , iar pentru integrarea acestui mediu de lucru alaturi de deployment-ul aplicatie, se va crea acest `docker-compose-dev.yml`:
-```docker
+```yaml
 services:
   dev-frontend:
     container_name: dev-frontend
