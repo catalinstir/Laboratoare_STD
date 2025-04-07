@@ -353,3 +353,58 @@ Accesand `localhost:30080/product`, observam:
 ![raspuns JSON 2](raspunsJSON2.PNG)
 
 
+Acum vrem sa facem si deployment-ul pentru frontend, astfel voi face un `frontend-depl.yaml` care nu va fi foarte diferit de `backend-depl.yaml`:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-service
+  template:
+    metadata:
+      labels:
+        app: frontend-service
+    spec:
+      containers:
+      - name: frontend-service
+        image: catalinstir/eproduct_frontend:latest
+        ports:
+        - containerPort: 4200
+```
+, insa avem nevoie si de comunicare intre pod-uri. Deci, ca in cazul backend-ului, voi face si un serviciu de __NodePort__ `frontend-nodeport-sv.yaml`:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-nodeport-service
+spec:
+  type: NodePort
+  selector:
+    app: frontend-service
+  ports:
+    - name: frontend-service
+      protocol: TCP
+      port: 4200
+      targetPort: 4200
+      nodePort: 30200
+```
+Acum trebuie sa modificam iarasi variabila de enviroment `apiURL` din `frontend\src\environments\environment.ts` sa fie acum `http://backend-nodeport-service:8080`.
+
+Fac imaginea `catalinstir/eproduct_frontend` cu:
+> docker image build -t catalinstir/eproduct_frontend frontend`
+
+Si ii dau push cu:
+> docker push catalinstir/eproduct_frontend
+
+Dam apply/restartam deployment-ul de front end:
+> kubectl apply -f k8s\frontend-depl.yaml
+
+Si pornim si serviciul de __NodePort__:
+> kubectl apply -f k8s\frontend-nodeport-sv.yaml
+
+Accesand acum `localhost:30200` avem:
+![output 2](output2.PNG)
