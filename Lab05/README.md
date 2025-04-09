@@ -406,5 +406,29 @@ Dam apply/restartam deployment-ul de front end:
 Si pornim si serviciul de __NodePort__:
 > kubectl apply -f k8s\frontend-nodeport-sv.yaml
 
+Output `kubectl get all`:
+```sh
+NAME                                READY   STATUS    RESTARTS      AGE
+pod/backend-depl-54977f7958-6hpm7   1/1     Running   2 (63m ago)   10h
+pod/db-depl-67f75954b5-zcrtk        1/1     Running   2 (63m ago)   11h
+pod/frontend-depl-56d5cbcb-bv2sv    1/1     Running   0             5m23s
+
+NAME                                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/backend-nodeport-service    NodePort    10.96.242.22     <none>        8080:30080/TCP   9h
+service/db-clusterip-service        ClusterIP   10.103.251.173   <none>        27017/TCP        10h
+service/frontend-nodeport-service   NodePort    10.111.22.26     <none>        4200:30200/TCP   90m
+service/kubernetes                  ClusterIP   10.96.0.1        <none>        443/TCP          13h
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/backend-depl    1/1     1            1           10h
+deployment.apps/db-depl         1/1     1            1           11h
+deployment.apps/frontend-depl   1/1     1            1           90m
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/backend-depl-54977f7958    1         1         1       10h
+replicaset.apps/db-depl-67f75954b5         1         1         1       11h
+replicaset.apps/frontend-depl-55846f7598   0         0         0       33m
+```
+
 Accesand acum `localhost:30200` avem:
 ![output 2](output2.PNG)

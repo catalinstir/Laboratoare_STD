@@ -33,7 +33,7 @@ Se creaza ambele masini cu urmatoarele caracteristici:
 - Se va merge la Review + Create si se va apasa ulterior pe Create.
 - Nu uitati, vrem doua astfel de masini. Cealalta se va numi server2.
 
-Voi seta modul de autentificare cu cheie RSA generata cu `sh-keygen -t rsa -b 4096 -f ./lab02key`
+Voi seta modul de autentificare cu cheie RSA generata cu `ssh-keygen -t rsa -b 4096 -f ./lab02key`
 
 ## 1. Configurare server web 1
 Copiem directorul `server1` pe prima masina virtuala cu comanda `scp`.
