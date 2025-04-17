@@ -1,0 +1,4 @@
+{
+    "editor.formatOnSave": true,
+    "C_Cpp.default.compilerPath": "/usr/bin/mpicc"
+}

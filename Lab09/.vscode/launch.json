@@ -12,7 +12,7 @@
       "args": [
         "--oversubscribe",
         "-n",
-        "2",
+        "3`",
         "${fileDirname}/${fileBasenameNoExtension}"
       ], // The secound parameter is the number of processes
       "stopAtEntry": false,

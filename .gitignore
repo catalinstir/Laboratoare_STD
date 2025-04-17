@@ -1,3 +1,4 @@
+.gitignore.bk
 .gitignore
 lab02key
 lab02key.pub
@@ -6,4 +7,16 @@ Lab04/lab04/frontend
 Lab05/frontend
 Lab05/backend
 Lab06\lab06key
-Lab06\lab06key.pub
+Lab09/firstAndLast
+Lab09/helloWorld
+Lab09/numCores
+Lab09/print100
+Lab09/twoDifferentProcesses
+Lab09/variables
+Lab10/broadcast
+Lab10/helloWorld
+Lab10/scatterGather
+Lab10/send
+Lab11/0_helloWorld
+Lab11/helloWorld
+Lab11/vectorPower
