@@ -1,7 +1,0 @@
-{
-    "editor.formatOnSave": true,
-    "files.associations": {
-        "system_error": "c"
-    },
-    "C_Cpp.default.compilerPath": "/usr/bin/mpicc",
-}

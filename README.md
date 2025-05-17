@@ -1,1 +1,0 @@
-# Laboratoare_STD
